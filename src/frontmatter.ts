@@ -16,9 +16,6 @@ export const PROPERTY_ORDER = [
   "Service URL",
 ] as const;
 
-/** Keys that Obsidian renders as list-type properties. */
-const LIST_KEYS = new Set(["aliases", "tags"]);
-
 /** Values accepted from tools, keyed by tool-parameter name. */
 export interface NoteProperties {
   title?: string;
@@ -72,7 +69,8 @@ function isEmpty(value: unknown): boolean {
 /** Serialize one `key: value` line (or block for lists). Empty => bare `key:`. */
 function serializeEntry(key: string, value: unknown): string {
   if (isEmpty(value)) return `${key}:`;
-  if (LIST_KEYS.has(key) && Array.isArray(value)) {
+  // All arrays — standard (aliases, tags) and custom — get block list format.
+  if (Array.isArray(value)) {
     const items = value.map((v) => `  - ${dumpScalar(v)}`).join("\n");
     return `${key}:\n${items}`;
   }
@@ -111,8 +109,15 @@ export interface ParsedNote {
 
 /** Parse an existing note into frontmatter object + body. */
 export function parseNote(raw: string): ParsedNote {
-  const parsed = matter(raw);
-  return { frontmatter: parsed.data ?? {}, body: parsed.content ?? "" };
+  try {
+    const parsed = matter(raw);
+    return { frontmatter: parsed.data ?? {}, body: parsed.content ?? "" };
+  } catch (e) {
+    throw new Error(
+      `YAML frontmatter 파싱 실패: ${(e as Error).message}\n` +
+      `이 노트의 frontmatter가 깨졌을 수 있습니다. 파일을 직접 열어 YAML 블록(--- ~ ---)을 확인하고 수동으로 복구하세요.`
+    );
+  }
 }
 
 /**
