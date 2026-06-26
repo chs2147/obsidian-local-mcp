@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "node",
+      "args": ["/ABSOLUTE/PATH/TO/obsidian-local-mcp/dist/index.js"]
+    }
+  }
+}
