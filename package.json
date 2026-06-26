@@ -14,7 +14,8 @@
     "build": "tsc && node -e \"require('fs').cpSync('src/ui','dist/ui',{recursive:true})\"",
     "start": "node dist/index.js",
     "settings": "node dist/settings-server.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "npm run build --silent && node --test test/frontmatter.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

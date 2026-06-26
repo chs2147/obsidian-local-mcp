@@ -52,9 +52,14 @@ function dumpScalar(value: unknown): string {
     const iso = value.toISOString();
     return iso.endsWith("T00:00:00.000Z") ? iso.slice(0, 10) : iso;
   }
-  // Emit ISO date strings unquoted so Obsidian recognizes them as date properties.
-  if (typeof value === "string" && ISO_DATE.test(value)) return value;
-  return yaml.dump(value, { lineWidth: -1, flowLevel: -1 }).trim();
+  if (typeof value === "string") {
+    // ISO dates: emit unquoted so Obsidian recognizes them as date-type properties.
+    if (ISO_DATE.test(value)) return value;
+    // yaml.dump serializes the string and appends \n; trimEnd removes only that trailing newline.
+    // Using trimEnd (not trim) so any intentional leading whitespace is not silently stripped.
+    return yaml.dump(value, { lineWidth: -1, flowLevel: -1 }).trimEnd();
+  }
+  return yaml.dump(value, { lineWidth: -1, flowLevel: -1 }).trimEnd();
 }
 
 function isEmpty(value: unknown): boolean {
